@@ -2,6 +2,18 @@ import { getMeal } from "@/lib/meals";
 import styles from "./page.module.css";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+
+export async function generateMetaData({ params }) {
+  const meal = await getMeal(params.mealSlug);
+  if (!meal) {
+    notFound();
+  }
+
+  return {
+    title: meal.title,
+    description: meal.summary,
+  };
+}
 export default function MealDetailPage({ params }) {
   const meal = getMeal(params.mealSlug);
 
@@ -10,12 +22,16 @@ export default function MealDetailPage({ params }) {
   }
 
   meal.instructions = meal.instructions.replace(/\n/g, "<br />");
-  
+
   return (
     <>
       <header className={styles.header}>
         <div className={styles.image}>
-          <Image src={meal.image} alt="meal" fill />
+          <Image
+            src={`https://foodie-app-images.s3.amazonaws.com/${meal.image}`}
+            alt={meal.title}
+            fill
+          />
         </div>
         <div className={styles.headerText}>
           <h1>{meal.title}</h1>
@@ -26,9 +42,12 @@ export default function MealDetailPage({ params }) {
         </div>
       </header>
       <main>
-        <p className={styles.instructions} dangerouslySetInnerHTML={{
-          __html: meal.instructions,
-        }}></p>
+        <p
+          className={styles.instructions}
+          dangerouslySetInnerHTML={{
+            __html: meal.instructions,
+          }}
+        ></p>
       </main>
     </>
   );
